@@ -33,6 +33,32 @@ teardown() {
   [ -d "$DESTINATION_DIR" ]
 }
 
+@test "creates archive containing expected files" {
+  echo "hello backup" > "$SOURCE_DIR/file.txt"
+  mkdir -p "$SOURCE_DIR/subdir"
+  echo "nested" > "$SOURCE_DIR/subdir/nested.txt"
+
+  run ./backup.sh "$SOURCE_DIR" "$DESTINATION_DIR"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Backup completed successfully"* ]]
+
+  backup_file=$(find "$DESTINATION_DIR" -type f -name "*.tar.gz")
+  [ -f "$backup_file" ]
+  [[ "$output" == *"$backup_file"* ]]
+
+  archive_listing=$(tar -tzf "$backup_file")
+  [[ "$archive_listing" == *"source/file.txt"* ]]
+  [[ "$archive_listing" == *"source/subdir/nested.txt"* ]]
+
+  extract_dir="$TEST_DIR/extract"
+  mkdir -p "$extract_dir"
+  tar -xzf "$backup_file" -C "$extract_dir"
+
+  [ "$(cat "$extract_dir/source/file.txt")" = "hello backup" ]
+  [ "$(cat "$extract_dir/source/subdir/nested.txt")" = "nested" ]
+}
+
 @test "backup filename contains timestamp in expected format" {
   run ./backup.sh "$SOURCE_DIR" "$DESTINATION_DIR"
 
