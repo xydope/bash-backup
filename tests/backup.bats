@@ -17,7 +17,7 @@ teardown() {
   run ./backup.sh
 
   [ "$status" -ne 0 ]
-  [[ "$output" == *"Usage:"* ]]
+  [[ "$output" == *"~/data ~/backups"* ]]
 }
 
 @test "fails when source directory does not exist" {
@@ -42,4 +42,18 @@ teardown() {
   backup_file=$(find "$DESTINATION_DIR" -type f -name "*.tar.gz")
 
   [[ "$backup_file" =~ $(basename "$SOURCE_DIR")_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2}\.tar\.gz$ ]]
+}
+
+@test "tar command is executed with error handling" {
+
+  echo $(ls -ld $TEST_DIR)
+
+  mkdir -p "$DESTINATION_DIR"
+
+  chmod -w "$DESTINATION_DIR" # Make destination directory unwritable to simulate error
+
+  run ./backup.sh "$SOURCE_DIR" "$DESTINATION_DIR"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"Error: Failed to create backup archive"* ]]
 }
