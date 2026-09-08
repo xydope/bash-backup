@@ -4,7 +4,6 @@ setup() {
   TEST_DIR="$(mktemp -d)"
   SOURCE_DIR="$TEST_DIR/source"
   DESTINATION_DIR="$TEST_DIR/backup"
-  RESTORE_DIR="$TEST_DIR/restore"
 
   mkdir -p "$SOURCE_DIR"
 }
@@ -17,7 +16,7 @@ teardown() {
   run ./backup.sh
 
   [ "$status" -ne 0 ]
-  [[ "$output" == *"~/data ~/backups"* ]]
+  [[ "$output" == *"Usage:"* ]]
 }
 
 @test "fails when source directory does not exist" {
@@ -45,8 +44,6 @@ teardown() {
 }
 
 @test "tar command is executed with error handling" {
-
-  echo $(ls -ld $TEST_DIR)
 
   mkdir -p "$DESTINATION_DIR"
 
