@@ -13,30 +13,30 @@ usage() {
   echo "  $0 ~/data ~/backups"
 }
 
-SOURCE_DIR="$1"
-DESTINATION_DIR="$2"
-
-if [[ "$SOURCE_DIR" == "--help" ]]; then
+if [[ "$1" == "--help" ]]; then
   usage
   exit 0
 fi
 
-if [[ ! $# -eq 2 ]]; then
+if [[ $# -ne 2 ]]; then
   usage
   exit 1
 fi
 
+SOURCE_DIR="$1"
+DESTINATION_DIR="$2"
+
 if [[ ! -d "$SOURCE_DIR" ]]; then
   msg="Error: Source directory '$SOURCE_DIR' does not exist."
 
-  echo "$msg"
+  echo "$msg" >&2
   logger -t bash-backup -p user.err "$msg"
   exit 1
 fi
 
 if ! mkdir -p "$DESTINATION_DIR" 2> /dev/null; then
   msg="Error: Failed to create destination directory '$DESTINATION_DIR'."
-  echo "$msg"
+  echo "$msg" >&2
   logger -t bash-backup -p user.err "$msg"
   exit 1
 fi
@@ -46,9 +46,11 @@ bkp_filename="$(basename "$SOURCE_DIR")_$(date +%Y-%m-%d_%H-%M-%S).tar.gz"
 if ! tar -czf "$DESTINATION_DIR/$bkp_filename" -C "$(dirname "$SOURCE_DIR")" "$(basename "$SOURCE_DIR")" &> /dev/null; then
   msg="Error: Failed to create backup archive '$DESTINATION_DIR/$bkp_filename'."
 
-  echo "$msg"
+  echo "$msg" >&2
   logger -t bash-backup -p user.err "$msg"
   exit 1
 fi
 
-echo "Backup completed successfully: $DESTINATION_DIR/$bkp_filename"
+msg="Backup completed successfully: $DESTINATION_DIR/$bkp_filename"
+echo "$msg"
+logger -t bash-backup -p user.info "$msg"
