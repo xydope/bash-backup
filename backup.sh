@@ -27,19 +27,27 @@ if [[ ! $# -eq 2 ]]; then
 fi
 
 if [[ ! -d "$SOURCE_DIR" ]]; then
-  echo "Error: Source directory '$SOURCE_DIR' does not exist."
+  msg="Error: Source directory '$SOURCE_DIR' does not exist."
+
+  echo "$msg"
+  logger -t bash-backup -p user.err "$msg"
   exit 1
 fi
 
 if ! mkdir -p "$DESTINATION_DIR" 2> /dev/null; then
-  echo "Error: Failed to create destination directory '$DESTINATION_DIR'."
+  msg="Error: Failed to create destination directory '$DESTINATION_DIR'."
+  echo "$msg"
+  logger -t bash-backup -p user.err "$msg"
   exit 1
 fi
 
 bkp_filename="$(basename "$SOURCE_DIR")_$(date +%Y-%m-%d_%H-%M-%S).tar.gz"
 
 if ! tar -czf "$DESTINATION_DIR/$bkp_filename" -C "$(dirname "$SOURCE_DIR")" "$(basename "$SOURCE_DIR")" &> /dev/null; then
-  echo "Error: Failed to create backup archive '$DESTINATION_DIR/$bkp_filename'."
+  msg="Error: Failed to create backup archive '$DESTINATION_DIR/$bkp_filename'."
+
+  echo "$msg"
+  logger -t bash-backup -p user.err "$msg"
   exit 1
 fi
 
