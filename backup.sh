@@ -51,6 +51,19 @@ if ! tar -czf "$DESTINATION_DIR/$bkp_filename" -C "$(dirname "$SOURCE_DIR")" "$(
   exit 1
 fi
 
+find "$DESTINATION_DIR" -type f -name "$(basename "$SOURCE_DIR")_*.tar.gz" -mtime +7 \
+  | while read -r old_backup; do
+    if rm "$old_backup"; then
+      msg="Old backup deleted: $old_backup"
+      echo "$msg"
+      logger -t bash-backup -p user.info "$msg"
+    else
+      msg="Error: Failed to delete old backup '$old_backup'."
+      echo "$msg" >&2
+      logger -t bash-backup -p user.err "$msg"
+    fi
+  done
+
 msg="Backup completed successfully: $DESTINATION_DIR/$bkp_filename"
 echo "$msg"
 logger -t bash-backup -p user.info "$msg"
