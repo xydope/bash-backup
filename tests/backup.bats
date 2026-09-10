@@ -80,3 +80,16 @@ teardown() {
   [ "$status" -ne 0 ]
   [[ "$output" == *"Error: Failed to create backup archive"* ]]
 }
+
+@test "deletes backup files older than 7 days" {
+  old_backup="$DESTINATION_DIR/source_2026-08-01_12-00-00.tar.gz"
+
+  mkdir -p "$DESTINATION_DIR"
+  touch "$old_backup"
+  touch -d "8 days ago" "$old_backup"
+
+  run ./backup.sh "$SOURCE_DIR" "$DESTINATION_DIR"
+
+  [ "$status" -eq 0 ]
+  [ ! -f "$old_backup" ]
+}
